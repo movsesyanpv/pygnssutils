@@ -34,6 +34,7 @@ from os import getenv, path
 from queue import Queue
 from threading import Event, Thread
 from time import sleep
+import math
 
 from certifi import where as findcacerts
 from pynmeagps import GET, NMEAMessage
