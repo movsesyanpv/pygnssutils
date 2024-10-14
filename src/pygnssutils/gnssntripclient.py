@@ -72,6 +72,10 @@ class GNSSNTRIPClient:
     NTRIP client class.
     """
 
+    refpos = [0, 0, 0]
+
+    rtcm_coord_types = ['1005', '1006', '1032']
+
     def __init__(self, app=None, **kwargs):
         """
         Constructor.
@@ -652,7 +656,12 @@ class GNSSNTRIPClient:
         :param bytes raw: raw data
         :param object parsed: parsed message
         """
-
+        
+        if parsed.identity in self.rtcm_coord_types:
+            self.refpos = self.ecef2pos([parsed.DF025, parsed.DF026, parsed.DF027])
+            # self.refpos[2] += parsed.DF028
+            pass
+        pass
         self._do_log(parsed, VERBOSITY_MEDIUM)
         if output is not None:
             # serialize sourcetable if outputting to stream
@@ -671,6 +680,51 @@ class GNSSNTRIPClient:
         if self.__app is not None:
             if hasattr(self.__app, "set_event"):
                 self.__app.set_event(NTRIP_EVENT)
+                
+    def ecef2pos(self, ecef):
+        '''
+        Function to convert xyz ECEF to llh
+        convert cartesian coordinate into geographic coordinate
+        ellipsoid definition: WGS84
+          a= 6,378,137m
+          f= 1/298.257
+
+        Input
+          x: coordinate X meters
+          y: coordinate y meters
+          z: coordinate z meters
+        Output
+          lat: latitude rad
+          lon: longitude rad
+          h: height meters
+        '''
+        x = ecef[0]
+        y = ecef[1]
+        z = ecef[2]
+        # --- WGS84 constants
+        a = 6378137.0
+        f = 1.0 / 298.257223563
+        # --- derived constants
+        b = a - f * a
+        e = math.sqrt(math.pow(a, 2.0) - math.pow(b, 2.0)) / a
+        clambda = math.atan2(y, x)
+        p = math.sqrt(pow(x, 2.0) + pow(y, 2))
+        h_old = 0.0
+        # first guess with h=0 meters
+        theta = math.atan2(z, p * (1.0 - math.pow(e, 2.0)))
+        cs = math.cos(theta)
+        sn = math.sin(theta)
+        N = math.pow(a, 2.0) / math.sqrt(math.pow(a * cs, 2.0) + math.pow(b * sn, 2.0))
+        h = p / cs - N
+        while abs(h - h_old) > 1.0e-6:
+            h_old = h
+            theta = math.atan2(z, p * (1.0 - math.pow(e, 2.0) * N / (N + h)))
+            cs = math.cos(theta)
+            sn = math.sin(theta)
+            N = math.pow(a, 2.0) / math.sqrt(math.pow(a * cs, 2.0) + math.pow(b * sn, 2.0))
+            h = p / cs - N
+        llh = [math.degrees(theta), math.degrees(clambda), h]
+        return llh
 
     def _serialize_srt(self, sourcetable: list) -> bytes:
         """
