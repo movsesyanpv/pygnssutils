@@ -15,7 +15,7 @@ from socket import AF_INET, AF_INET6, gaierror, getaddrinfo
 
 from pynmeagps import haversine
 from pyubx2 import itow2utc
-from globals import FIXLOOKUP
+from pygnssutils.globals import FIXLOOKUP
 
 
 def get_mp_distance(lat: float, lon: float, mp: list) -> float:
