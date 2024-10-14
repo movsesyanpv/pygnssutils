@@ -15,6 +15,7 @@ from socket import AF_INET, AF_INET6, gaierror, getaddrinfo
 
 from pynmeagps import haversine
 from pyubx2 import itow2utc
+from globals import FIXLOOKUP
 
 
 def get_mp_distance(lat: float, lon: float, mp: list) -> float:
@@ -198,3 +199,16 @@ def ipprot2str(family: int) -> str:
     if family == AF_INET6:
         return "IPv6"
     raise ValueError(f"Invalid family value {family}")
+
+def fix2desc(msgid: str, fix: object) -> str:
+    """
+    Get integer fix value for given message fix status.
+
+    :param str msgid: UBX or NMEA message identity
+    :param object fix: value representing fix type
+    :return: descriptive fix status e.g. "3D"
+    :rtype: str
+    """
+
+    return FIXLOOKUP.get(msgid + str(fix), "NO FIX")
+
