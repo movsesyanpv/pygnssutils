@@ -53,10 +53,10 @@ ubxsimulator = "pygnssutils.ubxsimulator:main"
 ubxcompare = "pygnssutils.ubxcompare:main"
 
 [project.urls]
-homepage = "https://github.com/semuconsulting/pygnssutils"
+homepage = "https://github.com/movsesyanpv/pygnssutils"
 documentation = "https://www.semuconsulting.com/pygnssutils/"
-repository = "https://github.com/semuconsulting/pygnssutils"
-changelog = "https://github.com/semuconsulting/pygnssutils/blob/master/RELEASE_NOTES.md"
+repository = "https://github.com/movsesyanpv/pygnssutils"
+changelog = "https://github.com/movsesyanpv/pygnssutils/blob/master/RELEASE_NOTES.md"
 
 [project.optional-dependencies]
 deploy = ["build", "pip", "setuptools >= 66.0", "wheel"]
